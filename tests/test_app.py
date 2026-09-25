@@ -149,7 +149,7 @@ class TestAIService:
         mock_client = MagicMock()
         mock_client.aio = mock_aio
         service._client = mock_client
-        service._model_name = "gemini-2.0-flash"
+        service._model_name = "gemini-3.5-flash-lite"
         service.rag = RAGService(mock_client)
         return service
 
@@ -177,7 +177,7 @@ class TestAPIRoutes:
 
     def test_health_endpoint(self):
         from fastapi.testclient import TestClient
-        with patch.dict(os.environ, {"GEMINI_API_KEY": "test-key", "GEMINI_MODEL": "gemini-2.0-flash"}):
+        with patch.dict(os.environ, {"GEMINI_API_KEY": "test-key", "GEMINI_MODEL": "gemini-3.5-flash-lite"}):
             from main import app
             client = TestClient(app)
             response = client.get("/health")

@@ -51,7 +51,7 @@ At the very end of your response, output exactly 3 smart follow-up questions tha
 
 
 class AIService:
-    def __init__(self, api_key: str, model: str = "gemini-2.0-flash"):
+    def __init__(self, api_key: str, model: str = "gemini-3.5-flash-lite"):
         if not api_key or api_key == "your_gemini_api_key_here":
             raise RuntimeError(
                 "GEMINI_API_KEY is not configured. Please set it in .env and restart."

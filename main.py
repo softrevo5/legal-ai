@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL   = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_MODEL   = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 HOST           = os.getenv("HOST", "0.0.0.0")
 PORT           = int(os.getenv("PORT", 8000))
 MAX_UPLOAD_MB  = int(os.getenv("MAX_UPLOAD_SIZE_MB", 20))
