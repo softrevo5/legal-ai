@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LexAI — RAG-powered legal document assistant. Upload any contract or agreement and ask questions with clause citations and visual insights." />
+  <title>LexAI — RAG Legal Assistant & Chatbot</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Marked.js for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+
+  <!-- ─── Background Ambient Glow ────────────────────────────────────── -->
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <!-- ─── Navigation ────────────────────────────────────────────────── -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand" aria-label="LexAI home">
+        <div class="brand-icon" aria-hidden="true">⚖️</div>
+        <span class="brand-name">Lex<span class="brand-accent">AI</span></span>
+        <span class="badge-rag">RAG Engine</span>
+      </a>
+      <div class="nav-right">
+        <div class="nav-pill" id="sessionBadge" aria-live="polite">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="sessionLabel">No document loaded</span>
+        </div>
+        <button class="btn btn-ghost" id="clearSessionBtn" aria-label="Clear session" title="Clear document and start over" style="display:none;">
+          🗑 Clear Session
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── Main Content Container ────────────────────────────────────── -->
+  <main class="main-container" id="mainContainer">
+
+    <!-- Hero / Upload View (visible before document upload) -->
+    <section class="upload-view" id="uploadView">
+      <div class="hero-header">
+        <div class="hero-badge">
+          <span>✨ Powered by Google Gemini & Vector RAG</span>
+        </div>
+        <h1 class="hero-title">
+          Understand Any <span class="gradient-text">Legal Contract</span><br/>
+          Through Interactive RAG Chat
+        </h1>
+        <p class="hero-subtitle">
+          Upload any legal agreement, contract, or policy. Our hybrid retrieval engine indexes every clause
+          so you can ask questions and receive visually structured, cited, plain-English answers.
+        </p>
+      </div>
+
+      <!-- Upload Dropzone -->
+      <div class="upload-card" id="dropzone" role="button" tabindex="0"
+           aria-label="Upload legal document — click or drag and drop">
+        <div class="upload-icon-wrapper">
+          <span class="upload-icon">📄</span>
+        </div>
+        <h2 class="upload-heading">Drop your legal document here</h2>
+        <p class="upload-sub">or <span class="link-highlight">browse from your computer</span></p>
+        <p class="upload-formats">PDF, DOCX, or TXT — up to 20 MB</p>
+        <input type="file" id="fileInput" accept=".pdf,.docx,.txt" class="file-input-hidden" />
+        <button class="btn btn-primary upload-btn" id="browseBtn" type="button">
+          Select Document
+        </button>
+      </div>
+
+      <!-- Upload & Indexing Progress -->
+      <div class="upload-progress" id="uploadProgress" style="display:none;">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-info">
+          <div class="spinner-sm"></div>
+          <span id="progressLabel">Uploading & indexing document into vector memory…</span>
+        </div>
+      </div>
+
+      <!-- Feature Highlights -->
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3>Clause-Level RAG</h3>
+          <p>Chunks and retrieves exact relevant provisions so answers are grounded directly in your contract.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Visual Answer Breakdown</h3>
+          <p>Clear key takeaways, legal implications, risk alerts, and concrete next steps for every question.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3>Risk & Trap Detection</h3>
+          <p>Flags termination traps, liability limits, indemnities, and hidden penalty obligations instantly.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chat / RAG Workspace (active once document is loaded) -->
+    <section class="rag-workspace" id="ragWorkspace" style="display:none;">
+      
+      <!-- Document Info Bar -->
+      <div class="doc-header-card">
+        <div class="doc-header-left">
+          <div class="doc-file-icon">📑</div>
+          <div class="doc-meta-info">
+            <h2 class="doc-title" id="docName">Contract.pdf</h2>
+            <div class="doc-stats" id="docStats">
+              <span class="stat-badge stat-rag"><span class="pulse-dot"></span> RAG Indexed</span>
+              <span class="stat-badge" id="statPages">1 Page</span>
+              <span class="stat-badge" id="statWords">0 words</span>
+              <span class="stat-badge" id="statChunks">0 clauses</span>
+            </div>
+          </div>
+        </div>
+        <div class="doc-header-actions">
+          <button class="btn btn-ghost btn-sm" id="uploadNewBtn" title="Upload another document">
+            ↑ Switch Document
+          </button>
+        </div>
+      </div>
+
+      <!-- Suggested Starter Questions -->
+      <div class="starter-chips-container" id="starterChipsContainer">
+        <span class="starter-label">💡 Suggested Questions:</span>
+        <div class="starter-chips" id="starterChips"></div>
+      </div>
+
+      <!-- Chat Stream Container -->
+      <div class="chat-viewport">
+        <div class="chat-messages" id="chatMessages" role="log" aria-live="polite">
+          <!-- Initial AI greeting bubble will be injected by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Chat Input Floating Bar -->
+      <div class="chat-input-wrapper">
+        <form class="chat-input-box" id="chatForm">
+          <textarea
+            class="chat-textarea"
+            id="chatInput"
+            placeholder="Ask anything about your document (e.g., 'What are my termination liabilities?')..."
+            rows="1"
+            maxlength="2000"
+            aria-label="Your legal question"
+          ></textarea>
+          <button class="btn btn-send" id="chatSendBtn" type="submit" aria-label="Send message">
+            <span>Ask LexAI</span>
+            <span class="send-arrow">➤</span>
+          </button>
+        </form>
+        <div class="chat-footer-note">
+          ⚖️ LexAI answers are AI-generated informational explanations grounded in your document and do not constitute formal legal advice.
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ─── Toast Container ────────────────────────────────────────────── -->
+  <div class="toast-container" id="toastContainer" role="alert" aria-live="assertive"></div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
